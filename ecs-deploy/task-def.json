@@ -1,0 +1,32 @@
+{
+    "family": "portfolio",
+    "volumes": [
+        {
+            "name": "my-vol",
+            "host": {}
+        }
+    ],
+    "containerDefinitions": [
+        {
+            "environment": [],
+            "name": "portfolio",
+            "image": "rshelly/portfolio:latest",
+            "cpu": 10,
+            "memory": 500,
+            "portMappings": [
+                {
+                    "containerPort": 3000,
+                    "hostPort": 80
+                }
+            ],
+            "mountPoints": [
+                {
+                    "sourceVolume": "my-vol",
+                    "containerPath": "/var/www/my-vol"
+                }
+            ],
+            "essential": true
+        }
+    ]
+  }
+  

@@ -1,0 +1,2 @@
+#!/bin/bash	
+echo ECS_CLUSTER=portfolio >> /etc/ecs/ecs.config
