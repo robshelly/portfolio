@@ -73,7 +73,7 @@ export default class AuthService {
             headers['Authorization'] = 'Bearer ' + this.getToken()
         }
 
-        return fetch(url, {
+        return fetch(`${this.domain}${url}`, {
             headers,
             ...options
         })
