@@ -15,9 +15,9 @@ var User   = require('./models/user'); // get our mongoose model
 var seed = require('./seed').seed; // seed DB function
 
 // =======================
-// configuration 
+// Configuration 
 // =======================
-// Connec to DB
+// Connect to DB
 mongoose.connect(secrets.database);
 app.set('secret', secrets.secret);
 
@@ -31,9 +31,9 @@ app.use(morgan('dev'));
 // Serve static files from the React app, necessary if deploying to heroku
 app.use(express.static(path.join(__dirname, '/../build')));
 
-// Allow CORS
+// Allow necessary requests and headers
 // https://stackoverflow.com/a/44190852/7105710
-var allowCrossDomain = function(req, res, next) {
+app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
@@ -42,25 +42,22 @@ var allowCrossDomain = function(req, res, next) {
       res.sendStatus(200);
   else 
       next();
-}
-app.use(allowCrossDomain);
+})
+
 
 // =======================
 // routes ================
 // =======================
-app.get('/seed', seed)
 
-// unauthenticated test route!
-app.get('/test', function(req, res) {
-  res.send('Hello! The API is at http://localhost:' + port + '/api');
-});
+// API call to seed DB with test data
+app.get('/seed', seed)
 
 // API ROUTES -------------------
 
-// get an instance of the router for api routes
+// Declare an express router to use for the authentication routes
 var apiRoutes = express.Router(); 
 
-// route to authenticate a user (POST http://localhost:8080/api/authenticate)
+// This route authenticates a user
 apiRoutes.post('/authenticate', function(req, res) {
 
   console.log("Authenticating user: ", req.body.username)
@@ -105,7 +102,10 @@ apiRoutes.post('/authenticate', function(req, res) {
   });
 });
 
-// route middleware to verify a token
+// This route verifies that a user is authenticated
+// and forwards the request is so
+// Thus, order is important here
+// All authenticated routes should be declared after this one
 apiRoutes.use(function(req, res, next) {
 
   // check header or url parameters or post parameters for token
@@ -137,32 +137,12 @@ apiRoutes.use(function(req, res, next) {
   }
 });
 
-// TODO, delete...route to show a random message (GET http://localhost:8080/api/)
-apiRoutes.get('/', function(req, res) {
-  res.json({ message: 'Welcome to the coolest API on earth!' });
-});
 
-apiRoutes.post('/holdings', function(req, res) {
-  User.findOne({
-    _id: req.body.id
-  }, function(err, user) {
-
-    if (!user) {
-      res.status(500).send({ error: "Transactions not found" });
-
-    } else if (user) {
-      res.json(
-        {
-          cash: user.cash,
-          holdings: user.holdings
-        }
-      );
-    }
-  })
-})
-
-// apply the routes to our application with the prefix /api
+// apply the above routes the prefix /api
 app.use('/api', apiRoutes);
+
+// Apply other authenticated routes
+app.use('/api/holdings', require('./api/holdings/index'))
 
 // =======================
 // start the server ======

@@ -110,8 +110,11 @@ class Holdings extends Component {
       .send({
         token: localStorage.id_token,
         id: this.props.user.id,
+        //TODO change this from hardcoded values
+        testData: 'testCase5'
       })
       .then((res) => {
+        console.log(res.text)
         var response = JSON.parse(res.text)
         this.setState({
           cash: response.cash,
